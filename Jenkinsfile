@@ -3,13 +3,8 @@ pipeline {
     stages {
         stage('Test') {
             steps {
-                sh '''
-                    docker run --rm \
-                      -v ${WORKSPACE}:/app \
-                      -w /app \
-                      python:3.12-slim \
-                      sh -c "pip install -r requirements.txt -q && pytest tests/ -v"
-                '''
+                sh 'docker build -t myapp-test -f Dockerfile.test .'
+                sh 'docker run --rm myapp-test'
             }
         }
         stage('Build') {
