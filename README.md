@@ -1,8 +1,37 @@
-# myapp
+# MyApp — CI/CD Pipeline Demo
 
-My Home lab demo App# tested webhook Tue May 19 07:50:32 AM UTC 2026
-# tested webhook Tue May 19 07:50:43 AM UTC 2026
-# tested webhook Tue May 19 07:58:10 AM UTC 2026
-# webhook test Wed May 20 06:17:24 AM UTC 2026
-# webhook test Wed May 20 06:19:52 AM UTC 2026
-# webhook test Wed May 20 06:23:11 AM UTC 2026
+## What this project demonstrates
+End-to-end CI/CD pipeline: code push → automated test → Docker build → deployment.
+Zero manual steps after `git push`.
+
+## Architecture
+## Stack
+- **Gitea** — self-hosted Git server (local GitHub replacement)
+- **Jenkins** — CI/CD engine with pipeline-as-code (Jenkinsfile)
+- **Docker** — containerised build, test, and runtime environment
+- **Python/Flask** — demo application with pytest test suite
+
+## Pipeline stages
+| Stage | What happens |
+|---|---|
+| Test | Runs pytest inside isolated Docker container |
+| Build | Builds versioned Docker image `myapp:BUILD_NUMBER` |
+| Deploy | Replaces running container with new version |
+
+## Key decisions made
+- Tests run inside Docker — pipeline has zero host dependencies
+- Dedicated `Dockerfile.test` separates test and production images
+- `notifyCommit` webhook bypasses Jenkins CSRF — cleaner than API tokens
+- Static IP on VM ensures webhook URL never changes
+
+## Lessons learned
+- Jenkins CSRF protection blocks naive webhook calls — solved with Git notifyCommit token
+- Docker-in-Docker via socket mount requires Docker CLI installed in Jenkins container
+- Branch naming mismatch (master vs main) is a common real-world gotcha
+
+## How to run locally
+```bash
+docker build -t myapp .
+docker run -p 5000:5000 myapp
+curl http://localhost:5000/health
+```
